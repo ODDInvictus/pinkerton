@@ -29,4 +29,5 @@ urlpatterns = [
     path('financial/', include('ibs.financial.urls')),
     path('activity/', include('ibs.activity.urls')),
     path('chugs/', include('ibs.chugs.urls')),
+    path('user/', include('ibs.users.urls')),
 ]
