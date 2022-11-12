@@ -68,11 +68,16 @@ class User(AbstractUser):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_COLOSSEUM)
 
   def is_ict(self):
-    return self._is_committee(settings.COMMITTEE_ABBREVIATION_ict)
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_ICT)
 
   def is_kasco(self):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_KASCO)
 
+  def is_member(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_MEMBER)
+
+  def is_aspiring_member(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_ASPIRING_MEMBER)
 
 class Committee(models.Model):
   name = models.CharField(max_length=100, verbose_name="Naam")
