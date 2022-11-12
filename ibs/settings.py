@@ -31,10 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # Important apps for the working of ibs
-    'ibs.users',
-    'ibs.tools',
-
     # django
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,6 +42,9 @@ INSTALLED_APPS = [
     # dependencies
     'rest_framework',
 
+    # Important apps for the working of ibs
+    'ibs.users',
+    'ibs.tools',
     # apps
     'ibs.financial',
     'ibs.activity',
