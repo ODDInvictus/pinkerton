@@ -1,10 +1,12 @@
-# Invictus Bier Systeem (backend)
+# Pinkerton (backend voor IBS)
+
+Om ook maar iets te doen met de backend, moet je eerst een shell openen met
 
 ```
 python -m pipenv shell
 ```
 
-daarna
+Hoe draai ik de server dan?
 
 ```
 python manage.py runserver
