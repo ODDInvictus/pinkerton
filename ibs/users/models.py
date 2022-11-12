@@ -1,7 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+from ibs.tools.mixins import BaseMixin
 
-class Generation(models.Model):
+class Generation(BaseMixin):
   """
     A generation is a group of users that became aspiring members at the same time.
   """
@@ -29,18 +31,11 @@ class User(AbstractUser):
   became_aspiring_member = models.DateField(null=True, blank=True, verbose_name="Datum van aspirant-lidmaatschap")
   became_member = models.DateField(null=True, blank=True, verbose_name="Datum van lidmaatschap")
 
-  # TODO add last_event_attended
-
   # Extra properties
   generation = models.ForeignKey(Generation, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Generatie")
   bio = models.TextField(max_length=500, blank=True)
   phone_number = models.CharField(max_length=20, blank=True)
   
-  # Important committees
-  is_senate = models.BooleanField(default=False)
-  is_colosseum = models.BooleanField(default=False)
-  is_bierco = models.BooleanField(default=False)
-
   class Meta:
     verbose_name = "User"
     verbose_name_plural = "Users"
@@ -52,12 +47,35 @@ class User(AbstractUser):
   def get_full_name(self):
     return f'{self.first_name} {self.last_name}'
 
+  def get_committees(self):
+    functions = Function.objects.filter(user=self, active=True).all()
+    return [f.committee for f in functions]
+
+  # Special committee helpers
+  def _is_committee(self, abbreviation):
+    committees = self.get_committees()
+    for committee in committees:
+      if committee.abbreviation == abbreviation:
+        return True
+    return False
+
   def is_senate(self):
-    # TODO
-    return self.function_set
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_SENATE)
+
+  def is_super_admin(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_ADMINS)
+
+  def is_colosseum(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_COLOSSEUM)
+
+  def is_ict(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_ict)
+
+  def is_kasco(self):
+    return self._is_committee(settings.COMMITTEE_ABBREVIATION_KASCO)
 
 
-class Committee(models.Model):
+class Committee(BaseMixin):
   name = models.CharField(max_length=100, verbose_name="Naam")
   abbreviation = models.CharField(max_length=10, verbose_name="Afkorting")
   description = models.CharField(max_length=1000, verbose_name="Omschrijving")
@@ -79,14 +97,23 @@ class Committee(models.Model):
 
   def __str__(self):
     return self.name
+  
+  def get_email(self):
+    if self.email:
+      return f'{self.name} <{self.email}>'
+    return f'{self.name} <{self.abbreviation}@oddinvictus.nl>'
 
   def get_members(self):
     if not self.active:
       return []
-    # TODO
+    return Function.objects.filter(committee=self, active=True)
 
+  def get_old_members(self):
+    if not self.active:
+      return []
+    return Function.objects.filter(committee=self, active=False)
 
-class Function(models.Model):
+class Function(BaseMixin):
   """
   Function of a committee member
   """
@@ -94,7 +121,7 @@ class Function(models.Model):
   committee = models.ForeignKey(Committee, on_delete=models.CASCADE, verbose_name="Commissie")
   function = models.CharField(max_length=100, verbose_name="Functie")
   note = models.CharField(max_length=1000, blank=True, verbose_name="Notitie")
-  begin = models.DateField(verbose_name="Begonnen op")
+  begin = models.DateField(verbose_name="Begonnen op", date_now=True)
   end = models.DateField(null=True, blank=True, verbose_name="Gestopt op")
   active = models.BooleanField(default=True, verbose_name="Actief")
 
@@ -105,6 +132,6 @@ class Function(models.Model):
 
   def __str__(self):
     active = 'Actief' if self.active else 'Niet actief'
-    return f'{self.user} is {self.function} in {self.function} ({active})'
+    return f'{self.user} is {self.function} in {self.committee} ({active})'
 
   
