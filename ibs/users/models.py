@@ -1,9 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
-from ibs.tools.mixins import BaseMixin
 
-class Generation(BaseMixin):
+class Generation(models.Model):
   """
     A generation is a group of users that became aspiring members at the same time.
   """
@@ -23,7 +22,7 @@ class Generation(BaseMixin):
 class User(AbstractUser):
   # Base properties
   initials = models.CharField(max_length=10, verbose_name="Initialen", blank=True)
-  profile_picture = models.ImageField(upload_to='profile_pictures', blank=True)
+  profile_picture = models.ImageField(upload_to='images/profile_pictures', blank=True)
 
   # Important dates
   birth_date = models.DateField(null=True, blank=True, verbose_name="Geboortedatum")
@@ -75,7 +74,7 @@ class User(AbstractUser):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_KASCO)
 
 
-class Committee(BaseMixin):
+class Committee(models.Model):
   name = models.CharField(max_length=100, verbose_name="Naam")
   abbreviation = models.CharField(max_length=10, verbose_name="Afkorting")
   description = models.CharField(max_length=1000, verbose_name="Omschrijving")
@@ -87,8 +86,8 @@ class Committee(BaseMixin):
 
   website = models.URLField(blank=True, verbose_name="Commissie website")
   email = models.EmailField(blank=True, verbose_name="Commissie email")
-  logo = models.ImageField(upload_to='committee_logos', blank=True, verbose_name="Commissie logo")
-  photo = models.ImageField(upload_to='committee_photos', blank=True, verbose_name="Commissie foto")
+  logo = models.ImageField(upload_to='images/committee_logos', blank=True, verbose_name="Commissie logo")
+  photo = models.ImageField(upload_to='images/committee_photos', blank=True, verbose_name="Commissie foto")
 
   class Meta:
     verbose_name = "Committee"
@@ -113,7 +112,7 @@ class Committee(BaseMixin):
       return []
     return Function.objects.filter(committee=self, active=False)
 
-class Function(BaseMixin):
+class Function(models.Model):
   """
   Function of a committee member
   """
@@ -121,7 +120,7 @@ class Function(BaseMixin):
   committee = models.ForeignKey(Committee, on_delete=models.CASCADE, verbose_name="Commissie")
   function = models.CharField(max_length=100, verbose_name="Functie")
   note = models.CharField(max_length=1000, blank=True, verbose_name="Notitie")
-  begin = models.DateField(verbose_name="Begonnen op", date_now=True)
+  begin = models.DateField(verbose_name="Begonnen op", auto_now_add=True)
   end = models.DateField(null=True, blank=True, verbose_name="Gestopt op")
   active = models.BooleanField(default=True, verbose_name="Actief")
 
