@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Activity
 
-class ActivitySerializer(serializers.HyperlinkedModelSerializer):
+class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
         fields = (
@@ -11,8 +11,7 @@ class ActivitySerializer(serializers.HyperlinkedModelSerializer):
           'date', 
           'start_time', 
           'location', 
-          'organisation_id', 
-          'people'
+          'organisation',
         )
 
     def create(self, validated_data):
@@ -24,6 +23,6 @@ class ActivitySerializer(serializers.HyperlinkedModelSerializer):
       instance.date = validated_data.get('date', instance.date)
       instance.start_time = validated_data.get('start_time', instance.start_time)
       instance.location = validated_data.get('location', instance.location)
-      instance.organisation_id = validated_data.get('organisation', instance.organisation_id)
+      instance.organisation = validated_data.get('organisation', instance.organisation)
       instance.save()
       return instance
