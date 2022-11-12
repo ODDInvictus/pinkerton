@@ -21,6 +21,7 @@ class Generation(models.Model):
 
 class User(AbstractUser):
   # Base properties
+  nickname = models.CharField(max_length=100, verbose_name="Bijnaam", blank=True)
   initials = models.CharField(max_length=10, verbose_name="Initialen", blank=True)
   profile_picture = models.ImageField(upload_to='images/profile_pictures', blank=True)
 
