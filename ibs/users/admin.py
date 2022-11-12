@@ -4,7 +4,7 @@ from ibs.users.models import User, Generation, Committee, Function
 
 # Register your models here.
 
-admin.register(User)
-admin.register(Generation)
-admin.register(Committee)
-admin.register(Function)
+admin.site.register(User)
+admin.site.register(Generation)
+admin.site.register(Committee)
+admin.site.register(Function)
