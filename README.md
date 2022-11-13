@@ -12,6 +12,11 @@ Hoe draai ik de server dan?
 python manage.py runserver
 ```
 
+## Nieuwe dependency toevoegen
+```
+pipenv install {naam}
+```
+
 ## Nieuwe app toevoegen
 
 Voorbeeld: {app naam} app

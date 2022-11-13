@@ -1,5 +1,9 @@
 from rest_framework import serializers
+
+from django.contrib.auth import  authenticate
+
 from .models import User, Generation, Committee, Function
+
 
 class UserSerializer(serializers.ModelSerializer):
   class Meta:
@@ -46,6 +50,34 @@ class UserSerializer(serializers.ModelSerializer):
     instance.phone_number = validated_data.get('phone_number', instance.phone_number)
     instance.save()
     return instance
+
+
+class LoginSerializer(serializers.Serializer):
+  username = serializers.CharField()
+  password = serializers.CharField()
+
+  def validate(self, data):
+    username = data.get('username', '')
+    password = data.get('password', '')
+
+    user = authenticate(**data)
+    print(user)
+    if username and password:
+      if user:
+        if user.is_active:
+          return user
+
+        else:
+          msg = 'User account is disabled.'
+          raise serializers.ValidationError(msg)
+
+      else:
+        msg = 'Unable to log in with provided credentials.'
+        raise serializers.ValidationError(msg)
+
+    else:
+      msg = 'Must provide username and password both.'
+      raise serializers.ValidationError(msg)
 
 
 class GenerationSerializer(serializers.ModelSerializer):

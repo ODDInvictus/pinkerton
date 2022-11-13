@@ -1,9 +1,11 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework import status, generics, permissions, serializers
+from knox.models import AuthToken
 
-from .serializers import UserSerializer, CommitteeSerializer, FunctionSerializer
+from .serializers import UserSerializer, CommitteeSerializer, FunctionSerializer, LoginSerializer
 from ibs.users.models import User, Function, Committee
 from ibs.tools.permissions import IsSuperAdmin, IsSenate
 
@@ -52,6 +54,7 @@ def get_user_by_id(request, user_id):
 
 
 @api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
 def update_own_user(request):
   """
   Update the current authenticated user
@@ -79,3 +82,21 @@ def update_user_by_id(request, user_id):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   except User.DoesNotExist:
     return Response(status=status.HTTP_404_NOT_FOUND)
+
+"""
+AUTHENTICATION views
+"""
+
+class SignInAPI(generics.GenericAPIView):
+  serializer_class = LoginSerializer
+  permission_classes = [AllowAny]
+
+  def post(self, request):
+    serializer = self.get_serializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data
+    print(user)
+    return Response({
+      "user": UserSerializer(user, context=self.get_serializer_context()).data,
+      "token": AuthToken.objects.create(user)[1]
+    })
