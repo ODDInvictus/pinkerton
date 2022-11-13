@@ -33,3 +33,8 @@ class ParticipantSerialzer(serializers.ModelSerializer):
   class Meta:
     model = Participant
     fields = "__all__"
+
+    def update(self, instance: Participant, validated_data):
+      instance.present = validated_data.get('present', instance.present)
+      instance.save()
+      return instance

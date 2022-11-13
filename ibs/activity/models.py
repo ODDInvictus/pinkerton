@@ -19,6 +19,7 @@ class Activity(BaseMixin):
     verbose_name = "Activity"
     verbose_name_plural = "Activities"
 
+
 class Participant(BaseMixin):
   activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
   user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
