@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from django.db import transaction
 
-from .serializers import ActivitySerializer, SmallParticipantSerialzer
+from .serializers import ActivitySerializer
 from .models import Activity, Participant
 
 from ibs.users.serializers import CommitteeSerializer
