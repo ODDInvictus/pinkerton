@@ -20,6 +20,12 @@ class Generation(models.Model):
 
 
 class User(AbstractUser):
+  # overwriting the AbstractUser class
+  first_name = models.CharField(max_length=100, verbose_name="Voornaam")
+  last_name = models.CharField(max_length=100, verbose_name="Achternaam")
+  email = models.EmailField(verbose_name="E-mailadres")
+  username = models.CharField(max_length=100, unique=True, verbose_name="Gebruikersnaam")
+
   # Base properties
   nickname = models.CharField(max_length=100, verbose_name="Bijnaam", blank=True)
   initials = models.CharField(max_length=10, verbose_name="Initialen", blank=True)
@@ -27,14 +33,14 @@ class User(AbstractUser):
 
   # Important dates
   birth_date = models.DateField(null=True, blank=True, verbose_name="Geboortedatum")
-  first_drink_invited_at = models.DateField(null=True, blank=True ,verbose_name="Datum van eerste meeborrel")
-  became_aspiring_member = models.DateField(null=True, blank=True, verbose_name="Datum van aspirant-lidmaatschap")
+  first_drink_invited_at = models.DateField(verbose_name="Datum van eerste meeborrel")
+  became_aspiring_member = models.DateField(verbose_name="Datum van aspirant-lidmaatschap")
   became_member = models.DateField(null=True, blank=True, verbose_name="Datum van lidmaatschap")
 
   # Extra properties
   generation = models.ForeignKey(Generation, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Generatie")
   bio = models.TextField(max_length=500, blank=True)
-  phone_number = models.CharField(max_length=20, blank=True)
+  phone_number = models.CharField(max_length=20)
   
   class Meta:
     verbose_name = "User"
