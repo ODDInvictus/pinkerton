@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Activity
+from .models import Activity, Participant
 
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,3 +26,10 @@ class ActivitySerializer(serializers.ModelSerializer):
       instance.organisation = validated_data.get('organisation', instance.organisation)
       instance.save()
       return instance
+
+
+class ParticipantSerialzer(serializers.ModelSerializer):
+
+  class Meta:
+    model = Participant
+    fields = "__all__"

@@ -10,7 +10,7 @@ class Activity(BaseMixin):
   date = models.DateField(verbose_name="Datum")
   start_time = models.TimeField(verbose_name="Starttijd")
   location = models.CharField(max_length=100, verbose_name="Locatie")
-  organisation = models.ForeignKey(Committee, on_delete=models.SET_NULL, null=True, verbose_name="Organisatie")
+  organisation = models.ForeignKey(Committee, on_delete=models.SET_DEFAULT, default=1, verbose_name="Organisatie")
 
   def __str__(self):
     return str(f'{self.name}, {self.location}, {self.organisation.name}, {self.date} {self.start_time}')

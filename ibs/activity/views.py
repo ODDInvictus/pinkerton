@@ -6,10 +6,12 @@ from rest_framework.response import Response
 
 from django.db import transaction
 
-from .serializers import ActivitySerializer
+from .serializers import ActivitySerializer, SmallParticipantSerialzer
 from .models import Activity, Participant
 
-from ibs.users.models import User
+from ibs.users.serializers import CommitteeSerializer
+
+from ibs.users.models import User, Committee
 from ibs.tools.permissions import IsSenate, IsSuperAdmin, IsMember
 
 @api_view(['GET'])
@@ -62,8 +64,24 @@ def activity_detail(request, activity_id):
     """
     try:
       activity = Activity.objects.get(id=activity_id)
-      serializer = ActivitySerializer(activity)
-      return Response(serializer.data)
+      participants = Participant.objects.filter(activity=activity).all()
+      ps = []
+
+      for p in participants:
+        u = User.objects.get(id=p.user.id)
+        ps.append({
+          'user': u.get_full_name(),
+          'present': p.present,
+          'user_id': u.id
+        })
+
+      activty_serializer = ActivitySerializer(activity)
+      organisation_serializer = CommitteeSerializer(activity.organisation)
+      return Response({
+        'activity': activty_serializer.data,
+        'participants': ps,
+        'organisation': organisation_serializer.data
+      })
     except Activity.DoesNotExist:
       return Response(status=status.HTTP_404_NOT_FOUND)
   
@@ -95,3 +113,9 @@ def update_activity(request, activity_id):
       return Response(status=status.HTTP_204_NO_CONTENT)
     except Activity.DoesNotExist:
       return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def activity_participants(request, activity_id):
+  pass
