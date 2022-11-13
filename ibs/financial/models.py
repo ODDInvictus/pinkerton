@@ -71,3 +71,23 @@ class ContributionTransaction(Transaction):
   def __str__(self):
     return f'{self.user.get_full_name()} heeft {self.price} betaald voor contributie op {self.date}'
   
+
+class SaleTransaction(Transaction):
+  """
+  Class that represents a sale
+  """
+  product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Product')
+
+  class Meta:
+    verbose_name = 'Verkoop'
+    verbose_name_plural = 'Verkopen'
+
+
+class AlcoholSaleTransaction(Transaction):
+  product = models.ForeignKey(AlcoholProduct, on_delete=models.CASCADE, verbose_name='Product')
+
+  class Meta:
+    verbose_name = 'Alcohol-verkoop'
+    verbose_name_plural = 'Alcohol-verkopen'
+
+  
