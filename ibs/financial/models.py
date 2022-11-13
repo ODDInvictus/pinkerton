@@ -48,7 +48,7 @@ class Transaction(models.Model):
   description = models.CharField(max_length=512, verbose_name='Omschrijving')
   price = models.FloatField(verbose_name='Prijs', default=0.00)
 
-  added_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Toegevoegd door', related_name='added_by')
+  added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Toegevoegd door', related_name='added_by')
   user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gebruiker')
 
   class Meta:
