@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -187,3 +188,21 @@ COMMITTEE_ABBREVIATION_KASCO = 'kasco'
 COMMITTEE_ABBREVIATION_ICT = 'ict'
 COMMITTEE_ABBREVIATION_MEMBER = 'members'
 COMMITTEE_ABBREVIATION_ASPIRING_MEMBER = 'aspiring'
+
+MONTHLY_CONTRIBUTION = 6.00
+
+# Celery settings
+
+CELERY_TIMEZONE= "Europe/Amsterdam"
+CELERY_TASK_TRACK_STARTED = True
+CELETER_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BEAT_SCHEDULE = {
+    'collect_monthly_contribution': {
+        'task': 'ibs.financial.tasks.collect_monthly_contribution',
+        'schedule': crontab(minute=0, hour=12, day_of_month='1'),
+        'options': {
+            'expires': 60
+        },
+    }
+}
