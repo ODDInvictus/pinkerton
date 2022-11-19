@@ -187,3 +187,9 @@ COMMITTEE_ABBREVIATION_KASCO = 'kasco'
 COMMITTEE_ABBREVIATION_ICT = 'ict'
 COMMITTEE_ABBREVIATION_MEMBER = 'members'
 COMMITTEE_ABBREVIATION_ASPIRING_MEMBER = 'aspiring'
+
+try:
+    from ibs import local_settings
+    DATABASES = local_settings.DATABASES
+except ImportError:
+    pass
