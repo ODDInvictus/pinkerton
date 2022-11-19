@@ -1,5 +1,8 @@
 from django.urls import path
+from ibs.chugs import views
 
 app_name = 'chugs'
 
-urlpatterns = []
+urlpatterns = [
+  path('', views.bakken)
+]
