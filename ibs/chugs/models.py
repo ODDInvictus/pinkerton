@@ -8,6 +8,7 @@ class Strafbak(models.Model):
   receiver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Ontvanger', related_name='stafbak_receiver')
   giver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gever', related_name='strafbak_giver')
   reason = models.CharField(max_length=512, verbose_name='Reden')
+  active = models.BooleanField(default=False, verbose_name='Getrokken')
 
   class Meta:
     verbose_name = 'Strafbak'

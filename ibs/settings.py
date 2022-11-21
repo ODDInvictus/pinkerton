@@ -189,6 +189,9 @@ COMMITTEE_ABBREVIATION_ICT = 'ict'
 COMMITTEE_ABBREVIATION_MEMBER = 'members'
 COMMITTEE_ABBREVIATION_ASPIRING_MEMBER = 'aspiring'
 
+DEFAULT_IBS_USER_USERNAME = 'ibs'
+DEFAULT_IBS_USER_EMAIL = 'ibs@oddinvictus.nl'
+
 MONTHLY_CONTRIBUTION = 6.00
 
 # Celery settings
@@ -200,6 +203,13 @@ CELETER_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = {
     'collect_monthly_contribution': {
         'task': 'ibs.financial.tasks.collect_monthly_contribution',
+        'schedule': crontab(minute=0, hour=12, day_of_month='1'),
+        'options': {
+            'expires': 60
+        },
+    },
+    'double_strafbakken': {
+        'task': 'ibs.chugs.tasks.double_strafbakken',
         'schedule': crontab(minute=0, hour=12, day_of_month='1'),
         'options': {
             'expires': 60
