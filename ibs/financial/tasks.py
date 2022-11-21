@@ -15,6 +15,8 @@ def collect_monthly_contribution():
   member_functions = CommitteeMember.objects.filter(committee=member_committee).all()
   members = User.objects.filter(function__in=member_functions).all()
 
+  added_by = User.objects.get(username=settings.DEFAULT_IBS_USER_USERNAME)
+
   today = datetime.now()
 
   for member in members:
@@ -22,6 +24,7 @@ def collect_monthly_contribution():
       user=member,
       date=today,
       description=f'Maandelijke contributie van maand: {today.month}',
+      added_by=added_by,
       amount=settings.MONTHLY_CONTRIBUTION)
 
     tr.save()
