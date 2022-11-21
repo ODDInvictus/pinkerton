@@ -5,8 +5,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import status, generics, permissions, serializers
 from knox.models import AuthToken
 
-from .serializers import UserSerializer, CommitteeSerializer, FunctionSerializer, LoginSerializer
-from ibs.users.models import User, Function, Committee
+from .serializers import UserSerializer, CommitteeSerializer, CommitteeMemberSerializer, LoginSerializer
+from ibs.users.models import User, CommitteeMember, Committee
 from ibs.tools.permissions import IsSuperAdmin, IsSenate
 
 @api_view(['GET'])
@@ -16,17 +16,17 @@ def get_user(request):
   Get the current authenticated user
   """
   user = request.user
-  functions = Function.objects.filter(user=user).all()
+  functions = CommitteeMember.objects.filter(user=user).all()
   committees = [f.committee for f in functions]      
 
   user_serializer = UserSerializer(user)
   committee_serializer = CommitteeSerializer(committees, many=True)
-  function_serializer = FunctionSerializer(functions, many=True)
+  commitee_member_serializer = CommitteeMemberSerializer(functions, many=True)
 
   return Response({
     'user': user_serializer.data,
     'committees': committee_serializer.data,
-    'functions': function_serializer.data
+    'committee_members': commitee_member_serializer.data
   })
 
 
@@ -38,16 +38,16 @@ def get_user_by_id(request, user_id):
   """
   try:
     user = User.objects.get(id=user_id)
-    functions = Function.objects.filter(user=user).all()
+    functions = CommitteeMember.objects.filter(user=user).all()
     committees = [f.committee for f in functions]      
 
     user_serializer = UserSerializer(user)
     committee_serializer = CommitteeSerializer(committees, many=True)
-    function_serializer = FunctionSerializer(functions, many=True)
+    commitee_member_serializer = CommitteeMemberSerializer(functions, many=True)
     return Response({
       'user': user_serializer.data,
       'committees': committee_serializer.data,
-      'functions': function_serializer.data
+      'committee_members': commitee_member_serializer.data
     })
   except User.DoesNotExist:
     return Response(status=status.HTTP_404_NOT_FOUND)

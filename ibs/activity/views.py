@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from django.db import transaction
 
-from .serializers import ActivitySerializer, ParticipantSerializer
+from .serializers import ActivitySerializer, ParticipantSerialzer
 from .models import Activity, Participant
 
 from ibs.users.serializers import CommitteeSerializer
@@ -128,7 +128,7 @@ def set_participation(request, activity_id):
 @permission_classes([IsAuthenticated])
 def get_participation(request, activity_id):
   participant = Participant.objects.get(user=request.user, activity=activity_id)
-  serializer = ParticipantSerializer(participant, data=request.data, partial=True)
+  serializer = ParticipantSerialzer(participant, data=request.data, partial=True)
   if serializer.is_valid():
     return Response(serializer.data)
   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from django.contrib.auth import  authenticate
 
-from .models import User, Generation, Committee, Function
+from .models import User, Generation, Committee, CommitteeMember
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -138,9 +138,9 @@ class CommitteeSerializer(serializers.ModelSerializer):
     return instance
 
 
-class FunctionSerializer(serializers.ModelSerializer):
+class CommitteeMemberSerializer(serializers.ModelSerializer):
   class Meta:
-    model = Function
+    model = CommitteeMember
     fields = (
       'id',
       'user',
@@ -153,9 +153,9 @@ class FunctionSerializer(serializers.ModelSerializer):
     )
 
   def create(self, validated_data):
-    return Function.objects.create(**validated_data)
+    return CommitteeMember.objects.create(**validated_data)
 
-  def update(self, instance: Function, validated_data):
+  def update(self, instance: CommitteeMember, validated_data):
     instance.user = validated_data.get('user', instance.user)
     instance.committee = validated_data.get('committee', instance.committee)
     instance.function = validated_data.get('function', instance.function)

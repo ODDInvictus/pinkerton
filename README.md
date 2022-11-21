@@ -12,6 +12,22 @@ Hoe draai ik de server dan?
 python manage.py runserver
 ```
 
+## Voor het eerst opstarten
+
+Voordat je ibs lokaal kan opstarten moet je eerst de database initializeren
+
+```
+python manage.py migrate
+```
+
+Daarna maak je een superuser aan
+
+```
+python manage.py createsuperuser
+```
+
+Met deze user kan je inloggen op http://127.0.0.1/admin
+
 ## Nieuwe dependency toevoegen
 ```
 pipenv install {naam}
