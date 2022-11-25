@@ -14,5 +14,6 @@ urlpatterns = [
 
   # auth
   path('login/', views.SignInAPI.as_view(), name='login'),
+  path('token-valid/', views.check_if_token_is_valid, name='token-valid'),
   path('logout/', knox_views.LogoutView.as_view(), name='logout'),
 ]

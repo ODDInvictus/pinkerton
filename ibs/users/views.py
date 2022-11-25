@@ -9,6 +9,8 @@ from .serializers import UserSerializer, CommitteeSerializer, CommitteeMemberSer
 from ibs.users.models import User, CommitteeMember, Committee
 from ibs.tools.permissions import IsSuperAdmin, IsSenate
 
+from datetime import timezone
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user(request):
@@ -99,6 +101,20 @@ def create_user(request):
 """
 AUTHENTICATION views
 """
+
+@api_view(['POST'])
+def check_if_token_is_valid(token):
+  """
+  Check if a token is valid
+  """
+  try:
+    token = AuthToken.objects.get(token=token)
+    if token.expiry is not None and token.expiry < timezone.now():
+      return Response(status=status.HTTP_401_UNAUTHORIZED)
+    return Response(status=status.HTTP_200_OK)
+  except AuthToken.DoesNotExist:
+    return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
 class SignInAPI(generics.GenericAPIView):
   serializer_class = LoginSerializer
