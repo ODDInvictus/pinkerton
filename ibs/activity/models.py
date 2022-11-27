@@ -12,12 +12,14 @@ class Activity(BaseMixin):
   location = models.CharField(max_length=100, verbose_name="Locatie")
   organisation = models.ForeignKey(Committee, on_delete=models.SET_DEFAULT, default=1, verbose_name="Organisatie")
 
+  members_only = models.BooleanField(default=False, verbose_name="Alleen voor leden")
+
   def __str__(self):
     return str(f'{self.name}, {self.location}, {self.organisation.name}, {self.date} {self.start_time}')
 
   class Meta:
-    verbose_name = "Activity"
-    verbose_name_plural = "Activities"
+    verbose_name = "Activiteit"
+    verbose_name_plural = "Activiteiten"
 
 
 class Participant(BaseMixin):

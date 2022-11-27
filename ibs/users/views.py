@@ -33,7 +33,7 @@ def get_user(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsSenate, IsSuperAdmin])
+@permission_classes([IsSenate | IsSuperAdmin])
 def get_user_by_id(request, user_id):
   """
   Returns a user by id
@@ -70,7 +70,7 @@ def update_own_user(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsSenate, IsSuperAdmin])
+@permission_classes([IsSenate | IsSuperAdmin])
 def update_user_by_id(request, user_id):
   """
   Update a user by id
@@ -87,7 +87,7 @@ def update_user_by_id(request, user_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsSenate, IsSuperAdmin])
+@permission_classes([IsSenate | IsSuperAdmin])
 def create_user(request):
   """
   Create a new user

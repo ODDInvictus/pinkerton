@@ -21,7 +21,11 @@ def activity(request):
     """
     Returns all activities
     """
-    activities = Activity.objects.all()
+    if request.user.is_aspiring_member():
+      activities = Activity.objects.filter(members_only=False)
+    else:
+      activities = Activity.objects.all()
+
     serializer = ActivitySerializer(activities, many=True)
     return Response(serializer.data)
 
@@ -87,7 +91,7 @@ def activity_detail(request, activity_id):
   
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsSenate, IsSuperAdmin])
+@permission_classes([IsSenate | IsSuperAdmin])
 def update_activity(request, activity_id):
   if request.method == 'PATCH':
     """

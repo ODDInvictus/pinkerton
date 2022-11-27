@@ -23,6 +23,7 @@ class IsSuperAdmin(BasePermission):
   """
 
   def has_permission(self, request, view):
+    print(request.user.is_super_admin())
     return _check_committe(request.user, 'is_super_admin')
 
 

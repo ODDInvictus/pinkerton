@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from .models import Product, ProductCategory, AlcoholProduct, Transaction, ContributionTransaction, SaleTransaction, AlcoholSaleTransaction
-
+from .models import Product, ProductCategory, AlcoholProduct, Transaction, ContributionTransaction, SaleTransaction, FoodProduct
+from ibs.users.models import User
 
 class ProductSerializer(serializers.ModelSerializer):
 
@@ -23,31 +23,43 @@ class AlcoholProductSerializer(serializers.ModelSerializer):
     model = AlcoholProduct
     fields = "__all__"
 
-
-class TransactionSerializer(serializers.ModelSerializer):
+class FoodProductSerializer(serializers.ModelSerializer):
 
   class Meta:
-    model = Transaction
+    model = FoodProduct
     fields = "__all__"
 
 
-class SaleTransactionSerializer(serializers.ModelSerializer):
+class TransactionSerializer(serializers.Serializer):
+  date = serializers.DateField(format="%d-%m-%Y")
+  description = serializers.CharField(max_length=512)
+  price = serializers.DecimalField(max_digits=10, decimal_places=2)
+  added_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+  user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
-  class Meta:
-    model = SaleTransaction
-    fields = "__all__"
-
-
-class AlcoholSaleTransactionSerializer(serializers.ModelSerializer):
-
-  class Meta:
-    model = AlcoholSaleTransaction
-    fields = "__all__"
+  def create(self, validated_data):
+    return Transaction.objects.create(**validated_data)
 
 
-class ContributionTransactionSerializer(serializers.ModelSerializer):
+class SaleTransactionSerializer(serializers.Serializer):
+  date = serializers.DateField(format="%d-%m-%Y")
+  description = serializers.CharField(max_length=512)
+  added_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+  user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+  product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+  amount = serializers.IntegerField()
 
-  class Meta:
-    model = ContributionTransaction
-    fields = "__all__"
+  def create(self, validated_data):
+    return SaleTransaction.objects.create(**validated_data)
 
+
+
+class ContributionTransactionSerializer(serializers.Serializer):
+  date = serializers.DateField(format="%d-%m-%Y")
+  description = serializers.CharField(max_length=512)
+  price = serializers.DecimalField(max_digits=10, decimal_places=2)
+  added_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+  user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+  def create(self, validated_data):
+    return ContributionTransaction.objects.create(**validated_data)

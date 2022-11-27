@@ -1,11 +1,12 @@
 from django.db import models
 
 from ibs.users.models import User
+from polymorphic.models import PolymorphicModel
 
 
 class ProductCategory(models.Model):
   name = models.CharField(max_length=512, verbose_name='Naam')
-  image = models.ImageField(upload_to='product_categories', verbose_name='Afbeelding')
+  image = models.ImageField(upload_to='images/product_categories', verbose_name='Afbeelding')
 
   class Meta:
     verbose_name = 'Productcategorie'
@@ -15,7 +16,7 @@ class ProductCategory(models.Model):
     return self.name
 
 
-class Product(models.Model):
+class Product(PolymorphicModel):
   name = models.CharField(max_length=512, verbose_name='Naam')
   category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name='Categorie')
   price = models.FloatField(verbose_name='Prijs')
@@ -40,7 +41,19 @@ class AlcoholProduct(Product):
     return f'{self.name} ({self.category}), {self.alcohol_percentage}% alcohol, {self.volume}ml'
 
 
-class Transaction(models.Model):
+class FoodProduct(Product):
+  kcal = models.FloatField(verbose_name='Kcal')
+  weight = models.FloatField(verbose_name='Gewicht')
+
+  class Meta:
+    verbose_name = 'Voedingsmiddel'
+    verbose_name_plural = 'Voeidingsmiddelen'
+
+  def __str__(self):
+    return f'{self.name} ({self.category})'
+
+
+class Transaction(PolymorphicModel):
   """
   Class that represents a transaction, only here as a base class for other transactions
   """
@@ -77,17 +90,8 @@ class SaleTransaction(Transaction):
   Class that represents a sale
   """
   product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Product')
+  amount = models.IntegerField(verbose_name='Aantal')
 
   class Meta:
     verbose_name = 'Verkoop'
     verbose_name_plural = 'Verkopen'
-
-
-class AlcoholSaleTransaction(Transaction):
-  product = models.ForeignKey(AlcoholProduct, on_delete=models.CASCADE, verbose_name='Product')
-
-  class Meta:
-    verbose_name = 'Alcohol-verkoop'
-    verbose_name_plural = 'Alcohol-verkopen'
-
-  

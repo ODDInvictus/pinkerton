@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # dependencies
+    'polymorphic',    
     'corsheaders',
     'knox',
     'rest_framework',

@@ -33,8 +33,8 @@ class User(AbstractUser):
 
   # Important dates
   birth_date = models.DateField(null=True, blank=True, verbose_name="Geboortedatum")
-  first_drink_invited_at = models.DateField(verbose_name="Datum van eerste meeborrel")
-  became_aspiring_member = models.DateField(verbose_name="Datum van aspirant-lidmaatschap")
+  first_drink_invited_at = models.DateField(verbose_name="Datum van eerste meeborrel", blank=True, null=True)
+  became_aspiring_member = models.DateField(verbose_name="Datum van aspirant-lidmaatschap", blank=True, null=True)
   became_member = models.DateField(null=True, blank=True, verbose_name="Datum van lidmaatschap")
 
   # Extra properties
