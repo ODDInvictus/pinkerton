@@ -103,12 +103,13 @@ AUTHENTICATION views
 """
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def check_if_token_is_valid(token):
   """
   Check if a token is valid
   """
   try:
-    token = AuthToken.objects.get(token=token)
+    token = AuthToken.objects.get(token_key=token)
     if token.expiry is not None and token.expiry < timezone.now():
       return Response(status=status.HTTP_401_UNAUTHORIZED)
     return Response(status=status.HTTP_200_OK)
@@ -124,8 +125,18 @@ class SignInAPI(generics.GenericAPIView):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data
-    print(user)
+
+    functions = CommitteeMember.objects.filter(user=user).all()
+    committees = [f.committee for f in functions]
+
+    committee_serializer = CommitteeSerializer(committees, many=True)
+    commitee_member_serializer = CommitteeMemberSerializer(functions, many=True)
+
+    print(committee_serializer.data)
+
     return Response({
-      "user": UserSerializer(user, context=self.get_serializer_context()).data,
-      "token": AuthToken.objects.create(user)[1]
+      'user': UserSerializer(user, context=self.get_serializer_context()).data,
+      'committees': committee_serializer.data,
+      'committee_members': commitee_member_serializer.data,
+      'token': AuthToken.objects.create(user)[1]
     })
