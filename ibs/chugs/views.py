@@ -13,7 +13,7 @@ from ibs.chugs.serializers import StrafbakSerializer, ChugSerializer
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser])
-def bakken(request):
+def strafbakken(request):
   match request.method:
     case 'GET':
       return get_bakken(request)
@@ -24,14 +24,14 @@ def bakken(request):
 
 def get_bakken(request):
   try:
-    bakkenCount = Strafbak.objects.raw('''
+    strafbakkenCount = Strafbak.objects.raw('''
       SELECT u.username AS name, COUNT(s.receiver_id) AS bakken, s.id
       FROM users_user AS u, chugs_strafbak AS s
       WHERE u.id = s.receiver_id
       GROUP BY s.receiver_id
       ORDER BY bakken
     ''')
-    response = [{'Name': x.name, 'Bakken': x.bakken} for x in bakkenCount]
+    response = [{'Name': x.name, 'Strafbakken': x.bakken} for x in strafbakkenCount]
     return Response(response, status=status.HTTP_200_OK)
   except Exception as error:
     print(error)
@@ -63,3 +63,30 @@ def trek_bakken(request):
       print(error)
       return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
   return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def strafbakken_user(request, user):
+  return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def bakken(request):
+  try:
+    bakkenCount = Chug.objects.raw('''
+      SELECT u.username AS name, COUNT(c.user_id) AS bakken, c.id
+      FROM users_user AS u, chugs_chug AS c
+      WHERE u.id = c.user_id
+      GROUP BY c.user_id
+      ORDER BY bakken
+    ''')
+    response = [{'Name': x.name, 'Bakken': x.bakken} for x in bakkenCount]
+    return Response(response, status=status.HTTP_200_OK)
+  except Exception as error:
+    print(error)
+    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def bakken_user(request, user):
+  return Response(status=status.HTTP_200_OK)

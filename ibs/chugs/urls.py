@@ -4,5 +4,8 @@ from ibs.chugs import views
 app_name = 'chugs'
 
 urlpatterns = [
-  path('', views.bakken)
+  path('strafbakken/', views.strafbakken),
+  path('bakken/', views.bakken),
+  path('strafbakken/<int:user>', views.strafbakken_user),
+  path('bakken/<int:user>', views.bakken_user)
 ]
