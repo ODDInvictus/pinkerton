@@ -67,7 +67,14 @@ def trek_bakken(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def strafbakken_user(request, user):
-  return Response(status=status.HTTP_200_OK)
+  try:
+    strafbakken = Strafbak.objects.filter(receiver_id=user).all()
+    details = [{'Giver': x.giver_id, 'Reason': x.reason, 'Date': x.date} for x in strafbakken]
+    response = {'Strafbakken': len(details), 'Details': details}
+    return Response(response, status=status.HTTP_200_OK)
+  except Exception as error:
+    print(error)
+    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -89,4 +96,11 @@ def bakken(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def bakken_user(request, user):
-  return Response(status=status.HTTP_200_OK)
+  try:
+    bakken = Chug.objects.filter(user_id=user).all()
+    dates = [{'Date': x.date, 'Time': x.time} for x in bakken]
+    response = {'Bakken': len(bakken), 'Dates': dates}
+    return Response(response, status=status.HTTP_200_OK)
+  except Exception as error:
+    print(error)
+    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
