@@ -48,9 +48,17 @@ class SaleTransactionSerializer(serializers.Serializer):
   user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
   product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
   amount = serializers.IntegerField()
+  price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
   def create(self, validated_data):
-    return SaleTransaction.objects.create(**validated_data)
+    trans = SaleTransaction.objects.create(**validated_data)
+    product = validated_data['product']
+    
+    trans.price = product.price * validated_data['amount']
+
+    trans.save()
+
+    return trans
 
 
 

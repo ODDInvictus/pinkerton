@@ -76,23 +76,11 @@ def get_all_transactions(request):
 @api_view(['POST'])
 @permission_classes([IsKasCo | IsSenate | IsSuperAdmin])
 def new_sale_transaction(request):
-  try:
-    data = request.data
-    product = Product.objects.get(id=request.data['product'])
-
-    data['price'] = product.price * request.data['amount']
-
-    serializer = SaleTransactionSerializer(data=request.data)
-
-    if serializer.is_valid():
-      # serializer.save()
-
-      return Response(serializer.data, status=status.HTTP_200_OK)
-  
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-  except Exception as e:
-    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+  serializer = SaleTransactionSerializer(data=request.data)
+  if serializer.is_valid():
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_200_OK)
+  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
