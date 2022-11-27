@@ -31,7 +31,7 @@ def get_bakken(request):
       GROUP BY s.receiver_id
       ORDER BY bakken
     ''')
-    response = [{"Name": x.name, "Bakken": x.bakken} for x in bakkenCount]
+    response = [{'Name': x.name, 'Bakken': x.bakken} for x in bakkenCount]
     return Response(response, status=status.HTTP_200_OK)
   except Exception as error:
     print(error)
@@ -39,7 +39,6 @@ def get_bakken(request):
 
 def give_bakken(request):
   request.data['giver'] = request.user.id
-  print(request.data)
   serializer = StrafbakSerializer(data=request.data)
   if serializer.is_valid():
     try:
@@ -52,15 +51,15 @@ def give_bakken(request):
   return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def trek_bakken(request):
-  bak = Strafbak.objects.get(receiver=request.user).order_by('date')[0]
-  bak.delete()
-  serializer = ChugSerializer(data=request.data)
+  serializer = ChugSerializer(data={'user': request.user.id})
   if serializer.is_valid():
     try:
       with transaction.atomic():
         serializer.save()
+        bak = Strafbak.objects.filter(receiver=request.user.id).order_by('date')[0]
+        bak.delete()
         return Response(status=status.HTTP_200_OK)
     except Exception as error:
       print(error)
       return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-  return Response('Body not valid', status=status.HTTP_400_BAD_REQUEST)
+  return Response(status=status.HTTP_400_BAD_REQUEST)

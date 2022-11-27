@@ -34,7 +34,7 @@ class Anytimer(models.Model):
 class Chug(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gebruiker')
   date = models.DateField(auto_now_add=True, verbose_name='Datum')
-  time = models.TimeField(verbose_name='Tijdstip')
+  time = models.TimeField(auto_now_add=True, verbose_name='Tijdstip')
 
   class Meta:
     verbose_name = 'Chug'
