@@ -33,8 +33,9 @@ class User(AbstractUser):
 
   # Important dates
   birth_date = models.DateField(null=True, blank=True, verbose_name="Geboortedatum")
-  first_drink_invited_at = models.DateField(verbose_name="Datum van eerste meeborrel")
-  became_aspiring_member = models.DateField(verbose_name="Datum van aspirant-lidmaatschap")
+  # Fakka niels, deze datums kunnen nu null zijn want ik mag anders geen superuser maken kusjes
+  first_drink_invited_at = models.DateField(null=True, verbose_name="Datum van eerste meeborrel")
+  became_aspiring_member = models.DateField(null=True, verbose_name="Datum van aspirant-lidmaatschap")
   became_member = models.DateField(null=True, blank=True, verbose_name="Datum van lidmaatschap")
 
   # Extra properties

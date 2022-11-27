@@ -7,7 +7,8 @@ from ibs.users.models import User
 class Strafbak(models.Model):
   receiver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Ontvanger', related_name='stafbak_receiver')
   giver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gever', related_name='strafbak_giver')
-  reason = models.CharField(max_length=512, verbose_name='Reden')
+  reason = models.CharField(null=True, max_length=512, verbose_name='Reden')
+  date = models.DateTimeField(auto_now_add=True, verbose_name='Datum')
 
   class Meta:
     verbose_name = 'Strafbak'
@@ -32,8 +33,7 @@ class Anytimer(models.Model):
 
 class Chug(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gebruiker')
-  time = models.FloatField(verbose_name='Tijd')
-  date = models.DateField(verbose_name='Datum')
+  date = models.DateField(auto_now_add=True, verbose_name='Datum')
   time = models.TimeField(verbose_name='Tijdstip')
 
   class Meta:
@@ -41,4 +41,4 @@ class Chug(models.Model):
     verbose_name_plural = 'Chugs'
 
   def __str__(self):
-    return f'{self.user.get_full_name()} trok een bak in {self.time} op {self.date} om {self.time}'
+    return f'{self.user.get_full_name()} trok een bak op {self.date} om {self.time}'
