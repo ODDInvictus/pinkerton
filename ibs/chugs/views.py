@@ -6,6 +6,7 @@ from rest_framework.parsers import JSONParser
 
 from django.db import transaction
 from django.db.models import Count
+from django.db.models import F
 
 from ibs.chugs.models import Strafbak, Anytimer, Chug
 from ibs.chugs.serializers import StrafbakSerializer, ChugSerializer
@@ -24,15 +25,8 @@ def strafbakken(request):
 
 def get_bakken(request):
   try:
-    strafbakkenCount = Strafbak.objects.raw('''
-      SELECT u.username AS name, COUNT(s.receiver_id) AS bakken, s.id
-      FROM users_user AS u, chugs_strafbak AS s
-      WHERE u.id = s.receiver_id
-      GROUP BY s.receiver_id
-      ORDER BY bakken
-    ''')
-    response = [{'Name': x.name, 'Strafbakken': x.bakken} for x in strafbakkenCount]
-    return Response(response, status=status.HTTP_200_OK)
+    strafbakkenCount = Strafbak.objects.filter(active=True).annotate(name=F('receiver__username')).values('name').annotate(bakken=Count('receiver'))
+    return Response(list(strafbakkenCount), status=status.HTTP_200_OK)
   except Exception as error:
     print(error)
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -51,26 +45,23 @@ def give_bakken(request):
   return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def trek_bakken(request):
-  serializer = ChugSerializer(data={'user': request.user.id})
-  if serializer.is_valid():
-    try:
-      with transaction.atomic():
-        serializer.save()
-        bak = Strafbak.objects.filter(receiver=request.user.id).order_by('date')[0]
-        bak.delete()
-        return Response(status=status.HTTP_200_OK)
-    except Exception as error:
-      print(error)
-      return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-  return Response(status=status.HTTP_400_BAD_REQUEST)
+  try:
+    with transaction.atomic():
+      strafbak = Strafbak.objects.filter(receiver=request.user.id).order_by('date')[0]
+      strafbak.active = 0
+      strafbak.save()
+      return Response(status=status.HTTP_200_OK)
+  except Exception as error:
+    print(error)
+    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def strafbakken_user(request, user):
   try:
-    strafbakken = Strafbak.objects.filter(receiver_id=user).all()
-    details = [{'Giver': x.giver_id, 'Reason': x.reason, 'Date': x.date} for x in strafbakken]
-    response = {'Strafbakken': len(details), 'Details': details}
+    strafbakken = Strafbak.objects.filter(receiver_id=user, active=True).all()
+    details = [{'giver': x.giver_id, 'reason': x.reason, 'date': x.date} for x in strafbakken]
+    response = {'strafbakken': len(details), 'details': details}
     return Response(response, status=status.HTTP_200_OK)
   except Exception as error:
     print(error)
@@ -80,15 +71,8 @@ def strafbakken_user(request, user):
 @permission_classes([IsAuthenticated])
 def bakken(request):
   try:
-    bakkenCount = Chug.objects.raw('''
-      SELECT u.username AS name, COUNT(c.user_id) AS bakken, c.id
-      FROM users_user AS u, chugs_chug AS c
-      WHERE u.id = c.user_id
-      GROUP BY c.user_id
-      ORDER BY bakken
-    ''')
-    response = [{'Name': x.name, 'Bakken': x.bakken} for x in bakkenCount]
-    return Response(response, status=status.HTTP_200_OK)
+    bakkenCount = Strafbak.objects.filter(active=False).annotate(name=F('receiver__username')).values('name').annotate(bakken=Count('receiver'))
+    return Response(list(bakkenCount), status=status.HTTP_200_OK)
   except Exception as error:
     print(error)
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -97,9 +81,9 @@ def bakken(request):
 @permission_classes([IsAuthenticated])
 def bakken_user(request, user):
   try:
-    bakken = Chug.objects.filter(user_id=user).all()
-    dates = [{'Date': x.date, 'Time': x.time} for x in bakken]
-    response = {'Bakken': len(bakken), 'Dates': dates}
+    bakken = Strafbak.objects.filter(receiver=user, active=False).all()
+    details = [{'date': x.date, 'reason': x.reason, 'giver': x.giver.username} for x in bakken]
+    response = {'bakken': len(bakken), 'details': details}
     return Response(response, status=status.HTTP_200_OK)
   except Exception as error:
     print(error)

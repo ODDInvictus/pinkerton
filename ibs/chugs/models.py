@@ -9,6 +9,7 @@ class Strafbak(models.Model):
   giver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gever', related_name='strafbak_giver')
   reason = models.CharField(null=True, max_length=512, verbose_name='Reden')
   date = models.DateTimeField(auto_now_add=True, verbose_name='Datum')
+  active = models.BooleanField(default=True, verbose_name='Actief')
 
   class Meta:
     verbose_name = 'Strafbak'
