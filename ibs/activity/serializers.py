@@ -28,6 +28,16 @@ class ActivitySerializer(serializers.ModelSerializer):
       return instance
 
 
+class CalendarSerializer(serializers.Serializer):
+  id = serializers.IntegerField()
+  name = serializers.CharField()
+  description = serializers.CharField()
+  date = serializers.DateField()
+  start_time = serializers.TimeField()
+  location = serializers.CharField()
+  organisation = serializers.CharField()
+
+
 class ParticipantSerialzer(serializers.ModelSerializer):
 
   class Meta:

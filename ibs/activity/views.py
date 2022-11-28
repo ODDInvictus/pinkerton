@@ -1,3 +1,4 @@
+import datetime
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -5,8 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.db import transaction
+from django.db.models import F
 
-from .serializers import ActivitySerializer, ParticipantSerialzer
+from .serializers import ActivitySerializer, CalendarSerializer, ParticipantSerialzer
 from .models import Activity, Participant
 
 from ibs.users.serializers import CommitteeSerializer
@@ -28,6 +30,21 @@ def activity(request):
 
     serializer = ActivitySerializer(activities, many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def calendar(request):
+  """
+  Returns all activities
+  """
+  today = datetime.date.today()
+  activities = Activity.objects.filter(date__gte=today).order_by('date')
+  if not request.user.is_aspiring_member():
+    activities = activities.filter(members_only=False)
+
+  serializer = CalendarSerializer(activities, many=True)
+  return Response(serializer.data)
 
 
 @api_view(['POST'])

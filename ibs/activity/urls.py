@@ -10,9 +10,13 @@ urlpatterns = [
     views.activity, 
     name='activity'),
   path(
+    'calendar/',
+    views.calendar,
+    name='calendar'),
+  path(
     'create/',
     views.create_activity,
-    name='create_activity'),
+    name='create-activity'),
   path(
     '<int:activity_id>/', 
     views.activity_detail, 
@@ -20,6 +24,5 @@ urlpatterns = [
   path(
     'update/<int:activity_id>/',
     views.update_activity,
-    name='update-activity'),
-  path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    name='update-activity')
 ]
