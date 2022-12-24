@@ -6,6 +6,6 @@ app_name = 'chugs'
 urlpatterns = [
   path('strafbakken/', views.strafbakken),
   path('bakken/', views.bakken),
-  path('strafbakken/<int:user>', views.strafbakken_user),
-  path('bakken/<int:user>', views.bakken_user)
+  path('strafbakken/<str:username>', views.strafbakken_user),
+  path('bakken/<str:username>', views.bakken_user)
 ]
