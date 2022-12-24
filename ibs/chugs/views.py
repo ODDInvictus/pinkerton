@@ -17,13 +17,15 @@ from ibs.chugs.serializers import StrafbakSerializer, ChugSerializer
 def strafbakken(request):
   match request.method:
     case 'GET':
-      return get_bakken(request)
+      return get_bakken()
     case 'POST':
       return give_bakken(request)
     case 'DELETE':
       return trek_bakken(request)
+  return Response(status=status.HTTP_400_BAD_REQUEST)
 
-def get_bakken(request):
+# Get details about your strafbakken
+def get_bakken():
   try:
     strafbakkenCount = Strafbak.objects.filter(active=True).annotate(name=F('receiver__username')).values('name').annotate(bakken=Count('receiver'))
     return Response(list(strafbakkenCount), status=status.HTTP_200_OK)
@@ -31,6 +33,7 @@ def get_bakken(request):
     print(error)
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Give a strafbak
 def give_bakken(request):
   request.data['giver'] = request.user.id
   serializer = StrafbakSerializer(data=request.data)
@@ -44,6 +47,7 @@ def give_bakken(request):
       return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
   return Response(status=status.HTTP_400_BAD_REQUEST)
 
+# Delete a strafbak of the sender of the requets
 def trek_bakken(request):
   try:
     with transaction.atomic():
@@ -55,18 +59,35 @@ def trek_bakken(request):
     print(error)
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
+# Get details of a user's strafbakken by id
+@api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def strafbakken_user(request, user):
-  try:
-    strafbakken = Strafbak.objects.filter(receiver_id=user, active=True).all()
-    details = [{'giver': x.giver_id, 'reason': x.reason, 'date': x.date} for x in strafbakken]
-    response = {'strafbakken': len(details), 'details': details}
-    return Response(response, status=status.HTTP_200_OK)
-  except Exception as error:
-    print(error)
-    return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  match (request.method):
+    case 'GET':
+      # Get details about a user's strafbakken
+      try:
+        strafbakken = Strafbak.objects.filter(receiver_id=user, active=True).all()
+        details = [{'giver': x.giver_id, 'reason': x.reason, 'date': x.date} for x in strafbakken]
+        response = {'strafbakken': len(details), 'details': details}
+        return Response(response, status=status.HTTP_200_OK)
+      except Exception as error:
+        print(error)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    case 'DELETE':
+      # Delete a user's strafbak
+      try:
+          with transaction.atomic():
+            strafbak = Strafbak.objects.filter(receiver=user).order_by('date')[0]
+            strafbak.active = 0
+            strafbak.save()
+            return Response(status=status.HTTP_200_OK)
+      except Exception as error:
+        print(error)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  return Response(status=status.HTTP_400_BAD_REQUEST)
 
+# Get an overview of all user's bakken
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def bakken(request):
@@ -77,6 +98,7 @@ def bakken(request):
     print(error)
     return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Get details about a user's bakken
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def bakken_user(request, user):
