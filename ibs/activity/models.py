@@ -32,5 +32,5 @@ class Participant(BaseMixin):
     return f'{self.user} is {p} at {self.activity}'
 
   class Meta:
-    verbose_name = "Participant"
-    verbose_name_plural = "Participants"
+    verbose_name = "Deelnemer"
+    verbose_name_plural = "Deelnemers"

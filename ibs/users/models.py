@@ -11,8 +11,8 @@ class Generation(models.Model):
   start_date = models.DateField(verbose_name="Startdatum")
 
   class Meta:
-    verbose_name = "Generation"
-    verbose_name_plural = "Generations"
+    verbose_name = "Generatie"
+    verbose_name_plural = "Generaties"
     ordering = ['generation_number']
 
   def __str__(self):
@@ -43,8 +43,8 @@ class User(AbstractUser):
   phone_number = models.CharField(max_length=20)
   
   class Meta:
-    verbose_name = "User"
-    verbose_name_plural = "Users"
+    verbose_name = "Gebruiker"
+    verbose_name_plural = "Gebruikers"
     ordering = ['last_name', 'first_name']
 
   def __str__(self):
@@ -103,8 +103,8 @@ class Committee(models.Model):
   photo = models.ImageField(upload_to='images/committee_photos', blank=True, verbose_name="Commissie foto")
 
   class Meta:
-    verbose_name = "Committee"
-    verbose_name_plural = "Committees"
+    verbose_name = "Commissie"
+    verbose_name_plural = "Commissies"
     ordering = ['name']
 
   def __str__(self):
@@ -138,8 +138,8 @@ class CommitteeMember(models.Model):
   active = models.BooleanField(default=True, verbose_name="Actief")
 
   class Meta:
-    verbose_name = "Committee Member"
-    verbose_name_plural = "Committee Members"
+    verbose_name = "Commissie lid"
+    verbose_name_plural = "Commissie leden"
     ordering = ['end', '-begin', 'user']
 
   def __str__(self):
