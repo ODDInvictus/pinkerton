@@ -1,13 +1,15 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-from rest_framework import status, generics, permissions, serializers
-from knox.models import AuthToken
+from rest_framework import status
+
+from django.contrib.auth import login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 from .serializers import UserSerializer, CommitteeSerializer, CommitteeMemberSerializer, LoginSerializer
 from ibs.users.models import User, CommitteeMember, Committee
-from ibs.tools.permissions import IsSuperAdmin, IsSenate
+from ibs.tools.permissions import IsFinanCie, IsKasCo, IsSuperAdmin, IsSenate
 
 from datetime import timezone
 
@@ -98,45 +100,26 @@ def create_user(request):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-"""
-AUTHENTICATION views
-"""
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def check_if_token_is_valid(token):
+@api_view(['GET'])
+def get_committees(request):
   """
-  Check if a token is valid
+  Get all committees
   """
-  try:
-    token = AuthToken.objects.get(token_key=token)
-    if token.expiry is not None and token.expiry < timezone.now():
-      return Response(status=status.HTTP_401_UNAUTHORIZED)
-    return Response(status=status.HTTP_200_OK)
-  except AuthToken.DoesNotExist:
-    return Response(status=status.HTTP_401_UNAUTHORIZED)
+  committees = Committee.objects.all()
+  serializer = CommitteeSerializer(committees, many=True)
+  return Response(serializer.data)
 
 
-class SignInAPI(generics.GenericAPIView):
-  serializer_class = LoginSerializer
-  permission_classes = [AllowAny]
+@api_view(['GET'])
+@permission_classes([IsSenate | IsSuperAdmin | IsFinanCie])
+def get_users(request):
+  """
+  Get all users
+  """
+  users = User.objects.all()
 
-  def post(self, request):
-    serializer = self.get_serializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data
+  filter = [u for u in users if u.is_member() == True or u.is_aspiring_member() == True]
 
-    functions = CommitteeMember.objects.filter(user=user).all()
-    committees = [f.committee for f in functions]
-
-    committee_serializer = CommitteeSerializer(committees, many=True)
-    commitee_member_serializer = CommitteeMemberSerializer(functions, many=True)
-
-    print(committee_serializer.data)
-
-    return Response({
-      'user': UserSerializer(user, context=self.get_serializer_context()).data,
-      'committees': committee_serializer.data,
-      'committee_members': commitee_member_serializer.data,
-      'token': AuthToken.objects.create(user)[1]
-    })
+  serializer = UserSerializer(filter, many=True)
+  return Response(serializer.data)

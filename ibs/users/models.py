@@ -65,7 +65,7 @@ class User(AbstractUser):
         return True
     return False
 
-  def is_senate(self):
+  def is_senaat(self):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_SENATE)
 
   def is_super_admin(self):

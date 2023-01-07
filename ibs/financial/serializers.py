@@ -3,12 +3,6 @@ from rest_framework import serializers
 from .models import Product, ProductCategory, AlcoholProduct, Transaction, ContributionTransaction, SaleTransaction, FoodProduct
 from ibs.users.models import User
 
-class ProductSerializer(serializers.ModelSerializer):
-
-  class Meta:
-    model = Product
-    fields = "__all__"
-
 
 class ProductCategorySerializer(serializers.ModelSerializer):
   
@@ -16,6 +10,12 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     model = ProductCategory
     fields = "__all__"
 
+class ProductSerializer(serializers.ModelSerializer):
+  category = ProductCategorySerializer(read_only=True)
+
+  class Meta:
+    model = Product
+    fields = "__all__"
 
 class AlcoholProductSerializer(serializers.ModelSerializer):
 

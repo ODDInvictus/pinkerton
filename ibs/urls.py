@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.urls import path
 
 from django.conf.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # django
@@ -24,10 +26,11 @@ urlpatterns = [
 
     # dependencies
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('knox/', include('knox.urls')),
 
     # apps
     path('financial/', include('ibs.financial.urls')),
     path('activity/', include('ibs.activity.urls')),
     path('chugs/', include('ibs.chugs.urls')),
     path('user/', include('ibs.users.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -19,7 +19,7 @@ class ProductCategory(models.Model):
 class Product(PolymorphicModel):
   name = models.CharField(max_length=512, verbose_name='Naam')
   category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name='Categorie')
-  price = models.FloatField(verbose_name='Prijs')
+  price = models.DecimalField(verbose_name='Prijs', max_digits=10, decimal_places=2)
 
   class Meta:
     verbose_name = 'Product'
@@ -30,8 +30,8 @@ class Product(PolymorphicModel):
 
 
 class AlcoholProduct(Product):
-  alcohol_percentage = models.FloatField(verbose_name='Alcoholpercentage')
-  volume = models.FloatField(verbose_name='Volume')
+  alcohol_percentage = models.DecimalField(verbose_name='Alcoholpercentage', max_digits=10, decimal_places=2)
+  volume = models.DecimalField(verbose_name='Volume', max_digits=10, decimal_places=2)
 
   class Meta:
     verbose_name = 'Alcohol-houdend product'
@@ -42,8 +42,8 @@ class AlcoholProduct(Product):
 
 
 class FoodProduct(Product):
-  kcal = models.FloatField(verbose_name='Kcal')
-  weight = models.FloatField(verbose_name='Gewicht')
+  kcal = models.IntegerField(verbose_name='Kcal')
+  weight = models.IntegerField(verbose_name='Gewicht (gram)')
 
   class Meta:
     verbose_name = 'Voedingsmiddel'
@@ -57,17 +57,23 @@ class Transaction(PolymorphicModel):
   """
   Class that represents a transaction, only here as a base class for other transactions
   """
-  date = models.DateField(verbose_name='Datum', auto_now_add=True)
+  created_at = models.DateTimeField(auto_now_add=True, verbose_name='Aangemaakt op')
+  updated_at = models.DateTimeField(auto_now=True, verbose_name='Bijgewerkt op')
+
+  date = models.DateField(verbose_name='Datum')
   description = models.CharField(max_length=512, verbose_name='Omschrijving')
-  price = models.FloatField(verbose_name='Prijs', default=0.00)
+  price = models.DecimalField(verbose_name='Prijs', default=0.00, max_digits=10, decimal_places=2)
 
   added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Toegevoegd door', related_name='added_by')
   user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gebruiker')
 
+  settled = models.BooleanField(verbose_name='Betaald', default=False)
+  deleted = models.BooleanField(verbose_name='Verwijderd', default=False)
+
   class Meta:
     verbose_name = 'Transactie'
     verbose_name_plural = 'Transacties'
-    ordering = ['-date']
+    ordering = ['date']
 
   def __str__(self):
     return f'{self.user.get_full_name()} heeft {self.price} betaald voor {self.description} op {self.date}'

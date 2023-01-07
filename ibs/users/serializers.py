@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from django.contrib.auth import  authenticate
+from django.contrib.auth import authenticate
 
 from .models import User, Generation, Committee, CommitteeMember
 
@@ -60,10 +60,12 @@ class LoginSerializer(serializers.Serializer):
     username = data.get('username', '')
     password = data.get('password', '')
 
-    user = authenticate(**data)
-    print(user)
+    request = self.context.get('request')
+
     if username and password:
-      if user:
+
+      user = authenticate(request, username=username, password=password)
+      if user is not None:
         if user.is_active:
           return user
 

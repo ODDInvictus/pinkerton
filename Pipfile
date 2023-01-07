@@ -12,8 +12,11 @@ django-filter = "*"
 pillow = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
-celery = "*"
 django-polymorphic = "*"
+celery = "*"
+django-celery-results = "*"
+django-celery-beat = "*"
+djangorestframework-recursive = "*"
 
 [dev-packages]
 

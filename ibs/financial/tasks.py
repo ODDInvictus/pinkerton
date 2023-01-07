@@ -4,13 +4,15 @@ from datetime import datetime
 from ibs.users.models import User, CommitteeMember, Committee
 from ibs.financial.models import ContributionTransaction
 
-from celery import shared_task
+from ..celery import app
 
-@shared_task()
+@app.task()
 def collect_monthly_contribution():
   """
   Collect monthly contribution from all the members
   """
+  print('Collecting monthly contribution')
+
   member_committee = Committee.objects.filter(abbreviation=settings.COMMITTEE_ABBREVIATION_MEMBER).first()
   member_functions = CommitteeMember.objects.filter(committee=member_committee).all()
   members = User.objects.filter(function__in=member_functions).all()
@@ -28,3 +30,8 @@ def collect_monthly_contribution():
       amount=settings.MONTHLY_CONTRIBUTION)
 
     tr.save()
+
+
+@app.task()
+def test():
+  print('test')

@@ -6,9 +6,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.db import transaction
-from django.db.models import F
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.conf import settings
 
-from .serializers import ActivitySerializer, CalendarSerializer, ParticipantSerialzer
+from .serializers import ActivitySerializer, ParticipantSerialzer
 from .models import Activity, Participant
 
 from ibs.users.serializers import CommitteeSerializer
@@ -24,27 +26,12 @@ def activity(request):
     Returns all activities
     """
     if request.user.is_aspiring_member():
-      activities = Activity.objects.filter(members_only=False)
+      activities = Activity.objects.filter(members_only=False, is_active=True)
     else:
-      activities = Activity.objects.all()
+      activities = Activity.objects.filter(is_active=True)
 
     serializer = ActivitySerializer(activities, many=True)
     return Response(serializer.data)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def calendar(request):
-  """
-  Returns all activities
-  """
-  today = datetime.date.today()
-  activities = Activity.objects.filter(date__gte=today).order_by('date')
-  if not request.user.is_aspiring_member():
-    activities = activities.filter(members_only=False)
-
-  serializer = CalendarSerializer(activities, many=True)
-  return Response(serializer.data)
 
 
 @api_view(['POST'])
@@ -56,13 +43,22 @@ def create_activity(request):
     Creates a new activity
     """
     serializer = ActivitySerializer(data=request.data)
+
+    organisation = Committee.objects.filter(id=request.data['organisation'])
+
     if serializer.is_valid():
       try:
         # Run everything in a transaction
         with transaction.atomic():
-          users = User.objects.all()
-          serializer.save()
+          activity = serializer.save()
 
+          if len(organisation) > 0:
+            organisation = organisation[0]
+            activity.organisation = organisation
+            activity.save()
+
+
+          users = User.objects.filter(~Q(username=settings.DEFAULT_IBS_USER_USERNAME))
           # Create a Participant object for every user 
           for u in users:
             participant = Participant(user=u, activity=serializer.instance, present=False)
@@ -92,16 +88,16 @@ def activity_detail(request, activity_id):
         u = User.objects.get(id=p.user.id)
         ps.append({
           'user': u.get_full_name(),
+          'email': u.email,
           'present': p.present,
+          'profile_picture': u.profile_picture.url if u.profile_picture else None,
           'user_id': u.id
         })
 
       activty_serializer = ActivitySerializer(activity)
-      organisation_serializer = CommitteeSerializer(activity.organisation)
       return Response({
         'activity': activty_serializer.data,
         'participants': ps,
-        'organisation': organisation_serializer.data
       })
     except Activity.DoesNotExist:
       return Response(status=status.HTTP_404_NOT_FOUND)
@@ -130,26 +126,29 @@ def update_activity(request, activity_id):
     """
     try:
       activity = Activity.objects.get(id=activity_id)
-      activity.delete()
+      activity.active = False
+      activity.save()
       return Response(status=status.HTTP_204_NO_CONTENT)
     except Activity.DoesNotExist:
       return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes([IsAuthenticated])
-def set_participation(request, activity_id):
-  participant = Participant.objects.get(user=request.user, activity=activity_id)
-  participant.present = request.data['present']
-  participant.save()
-  return Response(status=status.HTTP_200_OK)
+def participation(request, activity_id):
+  print(request.method)
+  if request.method == 'GET':
 
+    participant = get_object_or_404(Participant, user=request.user, activity=activity_id)
+    serializer = ParticipantSerialzer(participant, data=request.data, partial=True)
+    if serializer.is_valid():
+      return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_participation(request, activity_id):
-  participant = Participant.objects.get(user=request.user, activity=activity_id)
-  serializer = ParticipantSerialzer(participant, data=request.data, partial=True)
-  if serializer.is_valid():
-    return Response(serializer.data)
-  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  elif request.method == 'POST':
+
+    participant = get_object_or_404(Participant, user=request.user, activity=activity_id)
+    participant.present = request.data['present']
+    participant.save()
+
+    return Response(status=status.HTTP_200_OK)
