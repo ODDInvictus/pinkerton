@@ -138,4 +138,5 @@ GitHub.sublime-settings
 
 images
 
+# local django settings
 local_settings.py

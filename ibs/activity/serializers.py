@@ -24,7 +24,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     instance.save()
     return instance
 
-class ParticipantSerialzer(serializers.ModelSerializer):
+class ParticipantSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Participant
