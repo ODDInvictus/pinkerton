@@ -10,8 +10,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
-from .serializers import ActivitySerializer, ParticipantSerialzer
-from .models import Activity, Participant
+from ibs.activity.serializers import ActivitySerializer, ParticipantSerializer
+from ibs.activity.models import Activity, Participant
 
 from ibs.users.serializers import CommitteeSerializer
 
