@@ -1,0 +1,105 @@
+version: '3'
+
+services:
+  rabbit:
+    image: rabbitmq:3.11-management
+    hostname: rabbit
+    ports:
+      - 5672:5672
+      - 15672:15672
+  
+  redis:
+    image: redis:latest
+    hostname: redis
+    ports:
+      - 6379:6379
+      
+  mariadb:
+    image: mariadb:latest
+    hostname: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ibs
+      MYSQL_USER: ibs
+      MYSQL_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  
+  mail:
+    image: mailhog/mailhog
+    hostname: mail
+    ports:
+      - 1025:1025
+      - 8025:8025
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./docker/ibs/Dockerfile
+    image: ibs_celery_worker
+    hostname: ibs_celery_worker
+    command: /start-celeryworker
+    volumes:
+      - .:/ibs
+    env_file:
+      - ./docker/.env.dev
+    depends_on:
+      - rabbit
+      - redis
+      - mariadb
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./docker/ibs/Dockerfile
+    image: ibs_celery_beat
+    command: /start-celerybeat
+    volumes:
+      - .:/ibs
+    env_file:
+      - ./docker/.env.dev
+    depends_on:
+      - redis
+      - rabbit
+      - mariadb  
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./docker/ibs/Dockerfile
+    image: ibs_flower
+    command: /start-flower
+    volumes:
+      - .:/app
+    env_file:
+      - ./docker/.env.dev
+    ports:
+      - 5557:5555
+    depends_on:
+      - rabbit
+      - redis
+      - mariadb
+
+  ibs:
+    build: 
+      context: .
+      dockerfile: ./docker/ibs/Dockerfile
+    command: /start
+    hostname: ibs
+    ports:
+      - 8000:8000
+    env_file:
+      - ./docker/.env.dev
+    image: ibs
+    depends_on:
+      - rabbit
+      - redis
+      - mariadb
+      - mail
+
+volumes:
+  db_data:
+    driver: local

@@ -7,12 +7,12 @@ class Generation(models.Model):
     A generation is a group of users that became aspiring members at the same time.
   """
   name = models.CharField(max_length=100, verbose_name="Naam")
-  generation_number = models.IntegerField(verbose_name="Generatie nummer")
+  generation_number = models.IntegerField(verbose_name="Generatie nummer", unique=True)
   start_date = models.DateField(verbose_name="Startdatum")
 
   class Meta:
-    verbose_name = "Generation"
-    verbose_name_plural = "Generations"
+    verbose_name = "Generatie"
+    verbose_name_plural = "Generaties"
     ordering = ['generation_number']
 
   def __str__(self):
@@ -44,8 +44,8 @@ class User(AbstractUser):
   phone_number = models.CharField(max_length=20)
   
   class Meta:
-    verbose_name = "User"
-    verbose_name_plural = "Users"
+    verbose_name = "Gebruiker"
+    verbose_name_plural = "Gebruikers"
     ordering = ['last_name', 'first_name']
 
   def __str__(self):
@@ -55,8 +55,8 @@ class User(AbstractUser):
     return f'{self.first_name} {self.last_name}'
 
   def get_committees(self):
-    functions = Function.objects.filter(user=self, active=True).all()
-    return [f.committee for f in functions]
+    committees = CommitteeMember.objects.filter(user=self, active=True).all()
+    return [f.committee for f in committees]
 
   # Special committee helpers
   def _is_committee(self, abbreviation):
@@ -66,7 +66,7 @@ class User(AbstractUser):
         return True
     return False
 
-  def is_senate(self):
+  def is_senaat(self):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_SENATE)
 
   def is_super_admin(self):
@@ -87,6 +87,7 @@ class User(AbstractUser):
   def is_aspiring_member(self):
     return self._is_committee(settings.COMMITTEE_ABBREVIATION_ASPIRING_MEMBER)
 
+
 class Committee(models.Model):
   name = models.CharField(max_length=100, verbose_name="Naam")
   abbreviation = models.CharField(max_length=10, verbose_name="Afkorting")
@@ -103,8 +104,8 @@ class Committee(models.Model):
   photo = models.ImageField(upload_to='images/committee_photos', blank=True, verbose_name="Commissie foto")
 
   class Meta:
-    verbose_name = "Committee"
-    verbose_name_plural = "Committees"
+    verbose_name = "Commissie"
+    verbose_name_plural = "Commissies"
     ordering = ['name']
 
   def __str__(self):
@@ -118,16 +119,16 @@ class Committee(models.Model):
   def get_members(self):
     if not self.active:
       return []
-    return Function.objects.filter(committee=self, active=True)
+    return CommitteeMember.objects.filter(committee=self, active=True)
 
   def get_old_members(self):
     if not self.active:
       return []
-    return Function.objects.filter(committee=self, active=False)
+    return CommitteeMember.objects.filter(committee=self, active=False)
 
-class Function(models.Model):
+class CommitteeMember(models.Model):
   """
-  Function of a committee member
+  A user that is in a committee
   """
   user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Gebruiker")
   committee = models.ForeignKey(Committee, on_delete=models.CASCADE, verbose_name="Commissie")
@@ -138,8 +139,8 @@ class Function(models.Model):
   active = models.BooleanField(default=True, verbose_name="Actief")
 
   class Meta:
-    verbose_name = "Function"
-    verbose_name_plural = "Functions"
+    verbose_name = "Commissie lid"
+    verbose_name_plural = "Commissie leden"
     ordering = ['end', '-begin', 'user']
 
   def __str__(self):

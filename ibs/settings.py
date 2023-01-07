@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from datetime import timedelta
+from datetime import timedelta, tzinfo
+from celery.schedules import crontab
 from rest_framework.settings import api_settings
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,9 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # dependencies
+    'django_celery_beat',
+    'django_celery_results',
+    'polymorphic',    
     'corsheaders',
-    'knox',
     'rest_framework',
+    'knox',
 
     # Important apps for the working of ibs
     'ibs.users',
@@ -60,11 +65,11 @@ AUTH_USER_MODEL = 'users.User'
 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'ibs.tools.middleware.DisableCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -72,8 +77,17 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
+    'http://127.0.0.1:5173',
     'http://localhost:8000',
 ]
+
+CORS_ORIGIN_WHITELIST = CORS_ALLOWED_ORIGINS
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+
+CORS_ALLOW_CREDENTIALS = True
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_AGE = 1209600 # 2 weken
+
 
 ROOT_URLCONF = 'ibs.urls'
 
@@ -93,7 +107,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ibs.wsgi.application'
+WSGI_APPLITION = 'ibs.wsgi.application'
 
 
 # Database
@@ -102,11 +116,11 @@ WSGI_APPLICATION = 'ibs.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'USER': 'root',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'NAME': 'ibs',
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'NAME': os.getenv('DB_NAME', 'ibs'),
     }
 }
 
@@ -134,7 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Amsterdam'
 
 USE_I18N = True
 
@@ -159,21 +173,10 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'knox.auth.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25
-}
-
-REST_KNOX = {
-    'SECURE_HASH_ALGORITHM':'cryptography.hazmat.primitives.hashes.SHA512',
-    'AUTH_TOKEN_CHARACTER_LENGTH': 64, # By default, it is set to 64 characters (this shouldn't need changing).
-    'TOKEN_TTL': timedelta(hours=8), # The default is 10 hours i.e., timedelta(hours=10)).
-    'USER_SERIALIZER': 'ibs.users.serializers.UserSerializer',
-    'TOKEN_LIMIT_PER_USER': None, # By default, this option is disabled and set to None -- thus no limit.
-    'AUTO_REFRESH': True, # This defines if the token expiry time is extended by TOKEN_TTL each time the token is used.
-    # 'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
 }
 
 
@@ -183,13 +186,53 @@ REST_KNOX = {
 COMMITTEE_ABBREVIATION_SENATE = 'senaat'
 COMMITTEE_ABBREVIATION_ADMINS = 'admins'
 COMMITTEE_ABBREVIATION_COLOSSEUM = 'colosseum'
-COMMITTEE_ABBREVIATION_KASCO = 'kasco'
+COMMITTEE_ABBREVIATION_FINANCIE = 'financie'
 COMMITTEE_ABBREVIATION_ICT = 'ict'
 COMMITTEE_ABBREVIATION_MEMBER = 'members'
 COMMITTEE_ABBREVIATION_ASPIRING_MEMBER = 'aspiring'
 
+DEFAULT_IBS_USER_USERNAME = 'ibs'
+DEFAULT_IBS_USER_EMAIL = 'ibs@oddinvictus.nl'
+
+MONTHLY_CONTRIBUTION = 6.00
+
+# Celery settings
+
+CELERY_TIMEZONE= "Europe/Amsterdam"
+CELERY_TASK_TRACK_STARTED = True
+CELETER_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@localhost:5672')
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SCHEDULE = {
+    # Collect monthly contribution every 1st of the month at 12:00
+    'collect_monthly_contribution': {
+        'task': 'ibs.financial.tasks.collect_monthly_contribution',
+        'schedule': crontab(minute=0, hour=12, day_of_month='1'),
+        'options': {
+            'expires': 60
+        },
+    },
+    'test': {
+        'task': 'ibs.financial.tasks.test',
+        'schedule': crontab(minute='*/1'),
+        'options': {
+            'expires': 60
+        },
+    },
+    # Double the strafbakken every 1st of the month at 01:00
+    'double_strafbakken': {
+        'task': 'ibs.chugs.tasks.double_strafbakken',
+        'schedule': crontab(minute=0, hour=1, day_of_month='1'),
+        'options': {
+            'expires': 60
+        },
+    }
+}
+
 try:
-    from ibs import local_settings
-    DATABASES = local_settings.DATABASES
+    from ibs.local_settings import *
 except ImportError:
     pass

@@ -14,7 +14,7 @@ class IsSenate(BasePermission):
   Allows access only to senate members.
   """
   def has_permission(self, request, view):
-    return _check_committe(request.user, 'is_senate')
+    return _check_committe(request.user, 'is_senaat')
 
 
 class IsSuperAdmin(BasePermission):
@@ -23,6 +23,7 @@ class IsSuperAdmin(BasePermission):
   """
 
   def has_permission(self, request, view):
+    print(request.user.is_super_admin())
     return _check_committe(request.user, 'is_super_admin')
 
 
@@ -47,7 +48,15 @@ class IsKasCo(BasePermission):
   Allows access only to members of the KasCo committee.
   """
   def has_permission(self, request, view):
-    return _check_committe(request.user, 'is_kasco')
+    return _check_committe(request.user, 'is_financie')
+
+
+class IsFinanCie(BasePermission):
+  """
+  Allows access only to members of the FinanCie committee.
+  """
+  def has_permission(self, request, view):
+    return _check_committe(request.user, 'is_financie')
 
 
 class IsMember(BasePermission):
