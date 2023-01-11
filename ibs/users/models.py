@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 
+from ibs.users.managers import UserManager
+
 class Generation(models.Model):
   """
     A generation is a group of users that became aspiring members at the same time.
@@ -20,6 +22,9 @@ class Generation(models.Model):
 
 
 class User(AbstractUser):
+  # override the manager
+  objects = UserManager()
+  
   # overwriting the AbstractUser class
   first_name = models.CharField(max_length=100, verbose_name="Voornaam")
   last_name = models.CharField(max_length=100, verbose_name="Achternaam")

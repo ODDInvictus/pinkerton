@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0005_alter_committee_logo_alter_committee_photo_and_more'),
         ('activity', '0004_participant_delete_peoplepresent_and_more'),
     ]
 

@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0008_alter_user_became_aspiring_member_alter_user_email_and_more'),
         ('activity', '0006_rename_person_participant_user'),
     ]
 
