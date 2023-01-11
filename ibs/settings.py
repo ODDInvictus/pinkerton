@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     # apps
     'ibs.financial',
     'ibs.activity',
-    'ibs.chugs'
+    'ibs.chugs',
+    'ibs.maluspunten'
 ]
 
 # user model

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maluspunten overzicht</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    table {
+      margin-top: 1rem;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid black;
+    }
+
+    th, td {
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    Maluspunten
+  </h1>
+
+  <a href="{% url 'maluspunten:index' %}">Nieuwe maluspunt</a>
+
+  <table>
+    <thead>
+      <tr>
+        <td>ID</td>
+        <td>Feut</td>
+        <td>Reden</td>
+        <td>Aantal</td>
+        <td>Toegevoegd door</td>
+        <td>Op</td>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for maluspunt in maluspunten %}
+        <tr>
+          <td>{{ maluspunt.id }}</td>
+          <td>{{ maluspunt.user.first_name }}</td>
+          <td>{{ maluspunt.reason }}</td>
+          <td>{{ maluspunt.amount }}</td>
+          <td>{{ maluspunt.added_by.first_name }}</td>
+          <td>{{ maluspunt.created_at|date:'D. d-m' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+</body>
+</html>

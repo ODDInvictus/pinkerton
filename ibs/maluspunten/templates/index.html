@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maluspunten</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    form > div {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    form > label {
+      margin-top: 1rem;
+    }
+
+    form > input {
+      margin-top: 0.5rem;
+    }
+
+    form > button {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>
+    Maluspunten
+  </h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ field.errors }}
+    {{ form }}
+
+    <button type="submit">Toevoegen</button>
+  </form>
+
+  <br>
+
+  <a href="{% url 'maluspunten:overview' %}">Overzicht</a>
+  
+</body>
+</html>

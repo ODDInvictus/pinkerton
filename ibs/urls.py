@@ -33,4 +33,5 @@ urlpatterns = [
     path('activity/', include('ibs.activity.urls')),
     path('chugs/', include('ibs.chugs.urls')),
     path('user/', include('ibs.users.urls')),
+    path('maluspunten/', include('ibs.maluspunten.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
