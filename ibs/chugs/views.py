@@ -28,10 +28,20 @@ def strafbakken(request):
       return trek_strafbak(request)
   return Response(status=status.HTTP_400_BAD_REQUEST)
 
-# Get details about all user's strafbakken
+# Get details about all users strafbakken
 def get_strafbakken():
-  strafbakkenCount = Strafbak.objects.filter(active=True).annotate(name=F('receiver__username')).values('name').annotate(bakken=Count('receiver'))
-  return Response(list(strafbakkenCount), status=status.HTTP_200_OK)
+  strafbakkenCount = list(Strafbak.objects.filter(active=True).values_list('receiver__username').annotate(strafbakken=Count('receiver')))
+  users = list(User.objects.exclude(username='ibs').values_list('username', 'nickname').order_by('became_member', 'became_aspiring_member', 'first_drink_invited_at', 'nickname', 'username'))
+  print(users)
+  res = []
+  for user in users:
+    for strafbak in strafbakkenCount:
+      if user[0] == strafbak[0]:
+        res.append({'username': user[0], 'nickname': user[1], 'strafbakken': strafbak[1]})
+        break
+    else:
+      res.append({'username': user[0], 'nickname': user[1], 'strafbakken': 0})
+  return Response(res, status=status.HTTP_200_OK)
 
 # Give a strafbak
 def give_strafbak(request):
