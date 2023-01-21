@@ -10,6 +10,7 @@ class Strafbak(models.Model):
   reason = models.CharField(null=True, max_length=512, verbose_name='Reden')
   date = models.DateTimeField(auto_now_add=True, verbose_name='Datum')
   active = models.BooleanField(default=True, verbose_name='Actief')
+  date_deleted = models.DateTimeField(null=True, verbose_name='Datum getrokken')
 
   class Meta:
     verbose_name = 'Strafbak'
