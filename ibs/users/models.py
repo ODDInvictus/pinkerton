@@ -48,6 +48,9 @@ class User(AbstractUser):
   bio = models.TextField(max_length=500, blank=True)
   phone_number = models.CharField(max_length=20)
   
+  # LDAP
+  last_synced = models.DateTimeField(null=True, blank=True, verbose_name="Laatst gesynchroniseerd")
+  
   class Meta:
     verbose_name = "Gebruiker"
     verbose_name_plural = "Gebruikers"
@@ -149,7 +152,5 @@ class CommitteeMember(models.Model):
     ordering = ['end', '-begin', 'user']
 
   def __str__(self):
-    active = 'Actief' if self.active else 'Niet actief'
-    return f'{self.user} is {self.function} in {self.committee} ({active})'
-
+    return f'{self.user.get_full_name()}'
   
