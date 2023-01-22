@@ -121,7 +121,6 @@ def bakken_user(request, username):
 def getCount(isActive):
   bakkenCount = list(Strafbak.objects.filter(active=isActive).values_list('receiver__username').annotate(strafbakken=Count('receiver')))
   users = list(User.objects.exclude(username='ibs').values_list('username', 'nickname').order_by('became_member', 'became_aspiring_member', 'first_drink_invited_at', 'nickname', 'username'))
-  print(users)
   res = []
   for user in users:
     for bak in bakkenCount:
