@@ -71,8 +71,13 @@ def strafbakken_user(request, username):
     case 'GET':
       # Get details about a user's strafbakken
       strafbakken = Strafbak.objects.filter(receiver_id=user, active=True).all()
-      details = [{'giver': x.giver.username, 'reason': x.reason, 'date': x.date} for x in strafbakken]
-      response = {'strafbakken': len(details), 'details': details}
+      details = [{
+        'giver': x.giver.nickname or x.giver.username,
+        'giver_username': x.giver.username,
+        'reason': x.reason,
+        'date': x.date
+      } for x in strafbakken]
+      response = {'bakken': len(details), 'details': details}
       return Response(response, status=status.HTTP_200_OK)
     case 'DELETE':
       # Delete a user's strafbak
@@ -103,7 +108,8 @@ def bakken_user(request, username):
   details = [{
     'date': x.date_deleted,
     'reason': x.reason,
-    'giver': x.giver.username,
+    'giver': x.giver.nickname or x.giver.username,
+    'giver_username': x.giver.username,
     'dateReceived': x.date
   } for x in bakken]
   response = {'bakken': len(bakken), 'details': details}
@@ -115,7 +121,6 @@ def bakken_user(request, username):
 def getCount(isActive):
   bakkenCount = list(Strafbak.objects.filter(active=isActive).values_list('receiver__username').annotate(strafbakken=Count('receiver')))
   users = list(User.objects.exclude(username='ibs').values_list('username', 'nickname').order_by('became_member', 'became_aspiring_member', 'first_drink_invited_at', 'nickname', 'username'))
-  print(users)
   res = []
   for user in users:
     for bak in bakkenCount:
