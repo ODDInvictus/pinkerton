@@ -26,10 +26,11 @@ def index(request):
       return HttpResponseRedirect('/maluspunten/gelukt/')
 
   else:
-    form = MaluspuntForm()
+    form = MaluspuntForm(initial={'added_by': request.user.id})
       
     return render(request, 'index.html', {
-      'form': form
+      'form': form,
+      'user': request.user,
     })
     
     

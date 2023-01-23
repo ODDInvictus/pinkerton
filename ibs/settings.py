@@ -64,16 +64,28 @@ INSTALLED_APPS = [
 # user model
 AUTH_USER_MODEL = 'users.User'
 
+AUTHENTICATION_BACKENDS = [
+    'ibs.tools.backends.AutheliaRemoteUserAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    
     'ibs.tools.middleware.DisableCSRFMiddleware',
+
+    # Authentication
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Authelia
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
+    'ibs.tools.middleware.PersistentHttpRemoteUserMiddleware',
+    
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -89,6 +101,7 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_AGE = 1209600 # 2 weken
 
+LOGOUT_REDIRECT_URL = 'http://localhost:5173/logout'
 
 ROOT_URLCONF = 'ibs.urls'
 

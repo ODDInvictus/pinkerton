@@ -39,8 +39,11 @@
 
 <body>
   <h1>
-    Maluspunten
+    Hoi {{ user.first_name }}
   </h1>
+  <p>
+    Voeg hier een maluspunt toe
+  </p>
   <form method="post">
     {% csrf_token %}
     {{ field.errors }}

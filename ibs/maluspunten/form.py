@@ -4,6 +4,8 @@ from django.conf import settings
 from ibs.users.models import User, CommitteeMember
 
 class MaluspuntForm(forms.Form):
+  # TODO: dit weghalen of ModelChoiceField gaan gebruiken
+  # helemaal kut als je migraties moet doen
   feuten = CommitteeMember.objects.filter(committee__abbreviation=settings.COMMITTEE_ABBREVIATION_ASPIRING_MEMBER)
   members = CommitteeMember.objects.filter(committee__abbreviation=settings.COMMITTEE_ABBREVIATION_MEMBER)
   user = forms.ChoiceField(
