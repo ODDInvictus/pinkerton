@@ -140,6 +140,6 @@ def getCount(isActive):
   return res
 
 def deleteStrafbak(strafbak):
-  strafbak.active = 0
+  strafbak.active = False
   strafbak.date_deleted = datetime.now()
   strafbak.save()
