@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta, tzinfo
-from celery.schedules import crontab
 from rest_framework.settings import api_settings
 import os
 
@@ -44,8 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # dependencies
-    'django_celery_beat',
-    'django_celery_results',
     'polymorphic',    
     'corsheaders',
     'rest_framework',
@@ -213,42 +210,6 @@ DEFAULT_IBS_USER_USERNAME = 'ibs'
 DEFAULT_IBS_USER_EMAIL = 'ibs@oddinvictus.nl'
 
 MONTHLY_CONTRIBUTION = 6.00
-
-# Celery settings
-
-CELERY_TIMEZONE= "Europe/Amsterdam"
-CELERY_TASK_TRACK_STARTED = True
-CELETER_TASK_TIME_LIMIT = 30 * 60
-
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@localhost:5672')
-
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-CELERY_BEAT_SCHEDULE = {
-    # Collect monthly contribution every 1st of the month at 12:00
-    'collect_monthly_contribution': {
-        'task': 'ibs.financial.tasks.collect_monthly_contribution',
-        'schedule': crontab(minute=0, hour=12, day_of_month='1'),
-        'options': {
-            'expires': 60
-        },
-    },
-    'test': {
-        'task': 'ibs.financial.tasks.test',
-        'schedule': crontab(minute='*/1'),
-        'options': {
-            'expires': 60
-        },
-    },
-    # Double the strafbakken every 1st of the month at 01:00
-    'double_strafbakken': {
-        'task': 'ibs.chugs.tasks.double_strafbakken',
-        'schedule': crontab(minute=0, hour=1, day_of_month='1'),
-        'options': {
-            'expires': 60
-        },
-    }
-}
 
 try:
     from ibs.local_settings import *
