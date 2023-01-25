@@ -1,0 +1,15 @@
+[Unit]
+Description=Invictus Bier Systeem - uWSGI
+After=syslog.target
+
+[Service]
+ExecStart=/root/uwsgi/uwsgi --ini /apps/ibs/uwsgi.ini
+RuntimeDirectory=uwsgi
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
