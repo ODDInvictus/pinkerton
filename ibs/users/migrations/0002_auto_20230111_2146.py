@@ -6,16 +6,18 @@ def make_ibs_user(apps, schema_editor):
     IbsUser = apps.get_model('users', 'User')
     Generartion = apps.get_model('users', 'Generation')
 
-    gen = Generartion.objects.create(
+    gen = Generartion.objects.get_or_create(
         name="Bots",
         generation_number=-1,
         start_date='2021-09-07'
     )
     
-    gen.save()
-
+    gen = gen[0]
+    
     username = settings.DEFAULT_IBS_USER_USERNAME
     email = settings.DEFAULT_IBS_USER_EMAIL
+    
+    IbsUser.objects.filter(username=username).delete()
 
     user = IbsUser.objects.create_user(
         username, 

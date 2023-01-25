@@ -7,9 +7,10 @@ from ibs.users.models import User
 class Strafbak(models.Model):
   receiver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Ontvanger', related_name='stafbak_receiver')
   giver = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Gever', related_name='strafbak_giver')
-  reason = models.CharField(null=True, max_length=512, verbose_name='Reden')
+  reason = models.CharField(default='Geen reden gegeven', max_length=512, verbose_name='Reden')
   date = models.DateTimeField(auto_now_add=True, verbose_name='Datum')
   active = models.BooleanField(default=True, verbose_name='Actief')
+  date_deleted = models.DateTimeField(null=True, verbose_name='Datum getrokken')
 
   class Meta:
     verbose_name = 'Strafbak'
