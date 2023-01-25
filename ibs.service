@@ -3,7 +3,7 @@ Description=Invictus Bier Systeem - uWSGI
 After=syslog.target
 
 [Service]
-ExecStart=/root/uwsgi/uwsgi --ini /apps/ibs/uwsgi.ini
+ExecStart=/apps/ibs/start.sh
 RuntimeDirectory=uwsgi
 Restart=always
 KillSignal=SIGQUIT
