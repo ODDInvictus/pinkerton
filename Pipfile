@@ -13,9 +13,6 @@ pillow = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
 django-polymorphic = "*"
-celery = "*"
-django-celery-results = "*"
-django-celery-beat = "*"
 djangorestframework-recursive = "*"
 
 [dev-packages]
